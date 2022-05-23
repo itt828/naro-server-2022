@@ -26,6 +26,11 @@ type City struct {
 	Population  sql.NullInt64    `json:"population,omitempty"  db:"Population"`
 }
 
+type Me struct{
+    Username string `json:"username, omitempty" db:"username"`
+}
+
+
 var (
 	db *sqlx.DB
 )
@@ -62,6 +67,7 @@ func main() {
 	withLogin := e.Group("")
 	withLogin.Use(checkLogin)
 	withLogin.GET("/cities/:cityName", getCityInfoHandler)
+    withLogin.GET("/whoami", getWhiAmIHandler)
 
 	e.Start(":<ポート番号>")
 }
@@ -167,4 +173,12 @@ func getCityInfoHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, city)
+}
+
+func getWhoAmIHandler(c echo.Context) error {
+	sess, _ := session.Get("sessions", c)
+  
+	return c.JSON(http.StatusOK, Me{
+		Username: sess.Values["userName"].(string),
+	})
 }
